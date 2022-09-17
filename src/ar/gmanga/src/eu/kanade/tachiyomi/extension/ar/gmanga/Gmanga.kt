@@ -1,7 +1,5 @@
 package eu.kanade.tachiyomi.extension.ar.gmanga
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.extension.ar.gmanga.GmangaPreferences.Companion.PREF_CHAPTER_LISTING
 import eu.kanade.tachiyomi.extension.ar.gmanga.GmangaPreferences.Companion.PREF_CHAPTER_LISTING_SHOW_ALL
@@ -38,8 +36,8 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
-import java.time.LocalDateTime.parse
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class Gmanga : ConfigurableSource, HttpSource() {
 
@@ -61,11 +59,11 @@ class Gmanga : ConfigurableSource, HttpSource() {
         .rateLimit(4)
         .build()
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private val parsedDatePattern = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss ZZZ zzz")
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private val formattedDatePattern = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    private val parsedDatePattern: SimpleDateFormat = SimpleDateFormat(
+        "yyyy-MM-dd HH:mm:ss ZZZ zzz",
+        Locale.ENGLISH
+    )
+    private val formattedDatePattern: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
     override fun headersBuilder() = Headers.Builder().apply {
         add("User-Agent", USER_AGENT)
     }
@@ -158,7 +156,6 @@ class Gmanga : ConfigurableSource, HttpSource() {
         return GET(latestUrl, headers)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun mangaDetailsParse(response: Response): SManga {
         val altNamePrefix = "مسميّات أخرى"
         val translationStatusPrefix = "حالة الترجمة"
@@ -188,20 +185,13 @@ class Gmanga : ConfigurableSource, HttpSource() {
             var startedDate =
                 mangaData["s_date"]!!.jsonPrimitive.content.takeIf { it.isBlank().not() }
             startedDate = if (startedDate.isNullOrBlank().not()) {
-                parse(
-                    startedDate,
-                    parsedDatePattern
-                ).format(
-                    formattedDatePattern
-                )
+                parsedDatePattern.parse(startedDate!!)?.let { formattedDatePattern.format(it) }
             } else {
                 null
             }
             var endedDay = mangaData["e_date"]!!.jsonPrimitive.content.takeIf { it.isBlank().not() }
             endedDay = if (endedDay.isNullOrBlank().not()) {
-                parse(endedDay, parsedDatePattern).format(
-                    formattedDatePattern
-                )
+                parsedDatePattern.parse(endedDay!!)?.let { formattedDatePattern.format(it) }
             } else {
                 null
             }
