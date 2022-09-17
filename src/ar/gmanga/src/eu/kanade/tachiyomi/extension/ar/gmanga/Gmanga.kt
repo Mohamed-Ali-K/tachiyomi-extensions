@@ -167,7 +167,7 @@ class Gmanga : ConfigurableSource, HttpSource() {
         val mangaData = data["mangaDataAction"]!!.jsonObject["mangaData"]!!.jsonObject
         return SManga.create().apply {
             description =
-                mangaData["summary"]!!.jsonPrimitive.contentOrNull ?: "لم يتم اضافة قصة بعد"
+                mangaData["summary"]!!.jsonPrimitive.contentOrNull?.ifEmpty { "لم يتم اضافة قصة بعد" }
             artist =
                 mangaData["artists"]!!.jsonArray.joinToString(", ") { it.jsonObject["name"]!!.jsonPrimitive.content }
             author =
