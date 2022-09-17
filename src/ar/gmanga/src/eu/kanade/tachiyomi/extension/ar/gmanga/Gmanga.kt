@@ -61,6 +61,11 @@ class Gmanga : ConfigurableSource, HttpSource() {
         .rateLimit(4)
         .build()
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private val parsedDatePattern = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss ZZZ zzz")
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private val formattedDatePattern = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     override fun headersBuilder() = Headers.Builder().apply {
         add("User-Agent", USER_AGENT)
     }
@@ -134,7 +139,7 @@ class Gmanga : ConfigurableSource, HttpSource() {
                     url = "/mangas/${it.jsonObject["id"]!!.jsonPrimitive.content}"
                     title = it.jsonObject["title"]!!.jsonPrimitive.content
                     val thumbnail = "medium_${
-                        it.jsonObject["cover"]!!.jsonPrimitive.content.substringBeforeLast(".")
+                    it.jsonObject["cover"]!!.jsonPrimitive.content.substringBeforeLast(".")
                     }.webp"
                     thumbnail_url =
                         "https://media.gmanga.me/uploads/manga/cover/${it.jsonObject["id"]!!.jsonPrimitive.content}/$thumbnail"
@@ -185,17 +190,17 @@ class Gmanga : ConfigurableSource, HttpSource() {
             startedDate = if (startedDate.isNullOrBlank().not()) {
                 parse(
                     startedDate,
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss ZZZ zzz")
+                    parsedDatePattern
                 ).format(
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                    formattedDatePattern
                 )
             } else {
                 null
             }
             var endedDay = mangaData["e_date"]!!.jsonPrimitive.content.takeIf { it.isBlank().not() }
             endedDay = if (endedDay.isNullOrBlank().not()) {
-                parse(endedDay, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss ZZZ zzz")).format(
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                parse(endedDay, parsedDatePattern).format(
+                    formattedDatePattern
                 )
             } else {
                 null
@@ -215,11 +220,13 @@ class Gmanga : ConfigurableSource, HttpSource() {
             )
             additionalInformation.forEach { info ->
                 when (info) {
-                    startedDate -> description =
-                        "$description\n\n:$startedDayPrefix ᗏ \n$startedDate •"
+                    startedDate ->
+                        description =
+                            "$description\n\n:$startedDayPrefix ᗏ \n$startedDate •"
                     endedDay -> description = "$description\n\n:$endedDayPrefix ᗏ \n$endedDay •"
-                    alternativeName -> description =
-                        "$description\n\n:$altNamePrefix ᗏ \n$alternativeName •"
+                    alternativeName ->
+                        description =
+                            "$description\n\n:$altNamePrefix ᗏ \n$alternativeName •"
                     else -> description
                 }
             }
@@ -273,7 +280,7 @@ class Gmanga : ConfigurableSource, HttpSource() {
                     url = "/mangas/${it.jsonObject["id"]!!.jsonPrimitive.content}"
                     title = it.jsonObject["title"]!!.jsonPrimitive.content
                     val thumbnail = "medium_${
-                        it.jsonObject["cover"]!!.jsonPrimitive.content.substringBeforeLast(".")
+                    it.jsonObject["cover"]!!.jsonPrimitive.content.substringBeforeLast(".")
                     }.webp"
                     thumbnail_url =
                         "https://media.gmanga.me/uploads/manga/cover/${it.jsonObject["id"]!!.jsonPrimitive.content}/$thumbnail"
