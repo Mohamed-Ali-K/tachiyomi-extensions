@@ -1,0 +1,11 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+ext {
+    extName = 'Teamx'
+    pkgNameSuffix = 'ar.teamx'
+    extClass = '.TeamX'
+    extVersionCode = 23
+}
+
+apply from: "$rootDir/common.gradle"
