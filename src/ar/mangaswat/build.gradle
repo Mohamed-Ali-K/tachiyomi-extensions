@@ -1,0 +1,11 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+ext {
+    extName = 'سوات مانجا'
+    pkgNameSuffix = 'ar.mangaswat'
+    extClass = '.MangaSwat'
+    extVersionCode = 27
+}
+
+apply from: "$rootDir/common.gradle"
